@@ -6,7 +6,7 @@ const [datos, setDatos] = useState([])
 useEffect(()=>{
  async function pedirEscuelas(){
     try {
-        const respuesta = await fetch("https://apis.datos.gob.ar/georef/api/v2.0/establecimientos-educativos?provincia=Chubut&campos=estandar&max=100&inicio=0")
+        const respuesta = await fetch("https://apis.datos.gob.ar/georef/api/v2.0/establecimientos-educativos?provincia=Chubut")
         const datosApi = await respuesta.json()
 
         setDatos(datosApi.establecimientos_educativos);
