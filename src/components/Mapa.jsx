@@ -6,7 +6,7 @@ setOptions({
   v: "weekly",
 });
 
-const Mapa = ({ marcadores }) => {
+const Mapa = ({ marcadores, origen }) => {
   const trelew = {
     lat: -43.24895,
     lng: -65.30505,
@@ -24,7 +24,7 @@ const Mapa = ({ marcadores }) => {
         const { Map } = await importLibrary("maps");
 
         googleMap.current = new Map(mapaRef.current, {
-          center: trelew,
+          center: origen || trelew,
           zoom: 13,
           mapId: "DEMO_MAP_ID",
         });
@@ -42,32 +42,58 @@ const Mapa = ({ marcadores }) => {
       return;
     }
 
+    // Actualizamos el centro cuando cambia el origen
+    if (origen) {
+      googleMap.current.setCenter({
+        lat: origen.lat,
+        lng: origen.lng,
+      });
+    }
+
     async function actualizarMarcadores() {
       try {
         const { AdvancedMarkerElement } = await importLibrary("marker");
+
         marcadorRef.current.forEach((m) => {
           m.map = null;
         });
 
-marcadores.forEach((marcador)=>{
-  let nuevo_marcador = new AdvancedMarkerElement({
-    map: googleMap.current,
-    position: {
-      lat:marcador.lat, 
-      lng: marcador.lng
-    },
-    title: marcador.nombre
-  })
+        marcadorRef.current = [];
 
-  marcadorRef.current.push(nuevo_marcador)
-})
-
+        // MARCADOR DE MI UBICACIÓN
+        if (origen) {
+          const marcadorOrigen = new AdvancedMarkerElement({
+            map: googleMap.current,
+            position: {
+              lat: Number(origen.lat),
+              lng: Number(origen.lng),
+            },
+            title: "Mi ubicación actual",
+          });
+        
+          marcadorRef.current.push(marcadorOrigen);
+        }
+        
+        // MARCADORES DE LOS LUGARES ENCONTRADOS
+        marcadores.forEach((marcador) => {
+          const nuevo_marcador = new AdvancedMarkerElement({
+            map: googleMap.current,
+            position: {
+              lat: Number(marcador.lat),
+              lng: Number(marcador.lng),
+            },
+            title: marcador.nombre,
+          });
+        
+          marcadorRef.current.push(nuevo_marcador);
+        });
       } catch (error) {
         console.error(error);
       }
     }
-    actualizarMarcadores()
-  }, [marcadores, mapaListo]);
+
+    actualizarMarcadores();
+  }, [marcadores, mapaListo, origen]);
 
   return (
     <>
