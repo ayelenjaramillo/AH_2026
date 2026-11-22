@@ -6,7 +6,7 @@ setOptions({
   v: "weekly",
 });
 
-const Mapa = ({ marcadores, origen }) => {
+const Mapa = ({ marcadores, origen, ruta }) => {
   const trelew = {
     lat: -43.24895,
     lng: -65.30505,
@@ -15,6 +15,7 @@ const Mapa = ({ marcadores, origen }) => {
   const mapaRef = useRef(null);
   const googleMap = useRef(null);
   const marcadorRef = useRef([]);
+  const polilineaRef = useRef([]);
 
   const [mapaListo, setMapaListo] = useState(false);
 
@@ -70,10 +71,10 @@ const Mapa = ({ marcadores, origen }) => {
             },
             title: "Mi ubicación actual",
           });
-        
+
           marcadorRef.current.push(marcadorOrigen);
         }
-        
+
         // MARCADORES DE LOS LUGARES ENCONTRADOS
         marcadores.forEach((marcador) => {
           const nuevo_marcador = new AdvancedMarkerElement({
@@ -84,7 +85,7 @@ const Mapa = ({ marcadores, origen }) => {
             },
             title: marcador.nombre,
           });
-        
+
           marcadorRef.current.push(nuevo_marcador);
         });
       } catch (error) {
@@ -94,6 +95,54 @@ const Mapa = ({ marcadores, origen }) => {
 
     actualizarMarcadores();
   }, [marcadores, mapaListo, origen]);
+
+  useEffect(() => {
+    if (mapaListo == false || !googleMap.current) {
+      return;
+    }
+
+    async function dibujarRuta() {
+      polilineaRef.current.forEach((linea) => {
+        linea.setMap(null);
+      });
+
+      polilineaRef.current = [];
+
+      if (!ruta) return;
+
+      try {
+        const polilineas = await ruta.createPolylines();
+
+        polilineas.forEach((linea) => {
+          linea.setOptions({
+            strokeColor: "#21708C",
+            strokeOpacity: 0.9,
+            strokeWeight: 6,
+          });
+
+          linea.setMap(googleMap.current);
+        });
+
+        polilineaRef.current = polilineas;
+
+        const limites = new window.google.maps.LatLngBounds();
+
+        polilineas.forEach((linea) => {
+          linea.getPath().forEach((punto) => {
+            limites.extend(punto);
+          });
+        });
+
+        if (!limites.isEmpty()) {
+          googleMap.current.fitBounds(limites, 50);
+        }
+      } catch (error) {
+        console.error("Error al dibujar la ruta:", error);
+      }
+    }
+
+    dibujarRuta();
+  }, [ruta, mapaListo]);
 
   return (
     <>
