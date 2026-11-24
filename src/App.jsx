@@ -311,8 +311,7 @@ function App() {
       </nav>
 
       <Routes>
-        {/* INICIO */}
-        <Route
+              <Route
           path="/"
           element={
             <div className="min-h-screen bg-[#F5F5F2] text-stone-800">

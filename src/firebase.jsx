@@ -16,13 +16,6 @@ const firebaseConfig = {
 };
 
 
-console.log("API KEY:", import.meta.env.VITE_FIREBASE_APP_KEY);
-console.log("AUTH DOMAIN:", import.meta.env.VITE_FIREBASE_AUTH_DOMAIN);
-console.log("PROJECT ID:", import.meta.env.VITE_FIREBASE_PROJECT_ID);
-console.log("APP ID:", import.meta.env.VITE_FIREBASE_APP_ID);
-
-// Initialize Firebase
-console.log("Variable del .env:", import.meta.env.VITE_FIREBASE_PROJECT_ID);
 const app = initializeApp(firebaseConfig);
 console.log("Firebase conectado:", app.options.projectId);
 export const db = getFirestore(app);
